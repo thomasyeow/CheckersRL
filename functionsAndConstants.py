@@ -31,6 +31,9 @@ for x in range(8):
             boardArr[x][y] = RED
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = RED
+
+boardArr[2][3] = WHITE
+boardArr[3][2] = WHITE
 #TEMP
 #boardArr[3][4] = WHITE
 
@@ -59,7 +62,7 @@ def getBottomRightPos(position):
 #returns list containing tuple (origin: (x,y),destinations: list<(x, y)>, attackAvailable: boolean) for each red piece
 def getAllAvailableMoves():
     resultList = []
-    attackOnly = False
+    permitAttacksOnly = False
     #1st pass - append result list with every piece's options, regardless of whether attack is available
     for x in range(8):
         for y in range(8):
@@ -67,18 +70,27 @@ def getAllAvailableMoves():
                 validMoves, attackMoveAvailable = getValidMoves((x,y))
                 if len(validMoves) != 0:
                     if attackMoveAvailable:
-                        attackOnly = True
+                        permitAttacksOnly = True
                     resultList.append(((x,y), validMoves, attackMoveAvailable))
-    #2nd pass - remove all attackless pieces from resultList if attack is available
-    if attackOnly:
+    #2nd pass - remove all attackless pieces from resultList if attack is available, then remove the other non attack moves
+    
+    if permitAttacksOnly:
         for element in resultList:
             if not element[2]:
                 resultList.remove(element)
+            else:
+                print("Should not be false: ", element[2])
+                print("Result list has: ", len(resultList), " elements")
+                for destination in element[1]:
+                    if abs(element[0][1] - destination[1]) <= 1:
+                        element[1].remove(destination)
+    print("final lenght: ", len(resultList))
+    for element in resultList:
+        print(element[2])
     return resultList
 #returns a list of eligible moves for this piece, returns empty list if no moves available
 def getMovesForPiece(position):
-    validMoveList = getAllAvailableMoves()
-    for element in validMoveList:
+    for element in getAllAvailableMoves():
         if element[0] == position:
             return element[1]
     return []

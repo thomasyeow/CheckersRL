@@ -74,7 +74,6 @@ while(running):
                 showingValidMoves = False
             else:
                 #if clicked on own piece
-                print(getBottomRightPos(clickedSquare))
                 if getPiece(clickedSquare) == RED or getPiece(clickedSquare) == REDKING:
                     activePieceMoveList = getMovesForPiece(clickedSquare)
                     #if clicked piece has valid moves
