@@ -17,14 +17,14 @@ activePieceMoveList = []
 #END CONSTANTS & VARIABLES
 
 #Set up board
-"""
+
 for x in range(8):
     for y in range(3):
         if x % 2 == 0 and y % 2 != 0:
             boardArr[x][y] = WHITE
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = WHITE
-"""
+
 for x in range(8):
     for y in range(5,8):
         if x % 2 == 0 and y % 2 != 0:
@@ -32,20 +32,29 @@ for x in range(8):
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = RED
 
-boardArr[2][3] = WHITE
-boardArr[3][2] = WHITE
-#TEMP
-#boardArr[3][4] = WHITE
-
 #METHODS
-    #reverse board for AI
+    #reverse board and colors for AI
 def reverseBoard():
-    copyBoard = [[EMPTY] * 8 for _ in range(8)]
-    index = 0
+    #switch colors
+    for x in range(8):
+        for y in range(8):
+            piece = getPiece((x,y))
+            if piece == RED:
+                boardArr[x][y] = WHITE
+            elif piece == REDKING:
+                boardArr[x][y] = WHITEKING
+            elif piece == WHITE:
+                boardArr[x][y] = RED
+            elif piece == WHITEKING:
+                boardArr[x][y] = REDKING
+    #flip board
+    boardArr.reverse()
     for row in boardArr:
-        copyBoard[index] = row.copy()
-    return copyBoard
+        row.reverse()
+    
+    print(boardArr)
     #if move was an attack, remove attacked piece
+
 def removeIfAttack(origin, destination):
     if abs(origin[1] - destination[1]) > 1:
         boardArr[(origin[0] + destination[0])//2][(origin[1] + destination[1])//2] = EMPTY
@@ -73,20 +82,14 @@ def getAllAvailableMoves():
                         permitAttacksOnly = True
                     resultList.append(((x,y), validMoves, attackMoveAvailable))
     #2nd pass - remove all attackless pieces from resultList if attack is available, then remove the other non attack moves
-    
+        
     if permitAttacksOnly:
+        tempList = []
         for element in resultList:
-            if not element[2]:
-                resultList.remove(element)
-            else:
-                print("Should not be false: ", element[2])
-                print("Result list has: ", len(resultList), " elements")
-                for destination in element[1]:
-                    if abs(element[0][1] - destination[1]) <= 1:
-                        element[1].remove(destination)
-    print("final lenght: ", len(resultList))
-    for element in resultList:
-        print(element[2])
+            #if has attack moves
+            if element[2]:
+                tempList.append(element)
+        resultList = tempList
     return resultList
 #returns a list of eligible moves for this piece, returns empty list if no moves available
 def getMovesForPiece(position):

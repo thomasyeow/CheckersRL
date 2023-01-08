@@ -75,6 +75,7 @@ while(running):
             else:
                 #if clicked on own piece
                 if getPiece(clickedSquare) == RED or getPiece(clickedSquare) == REDKING:
+
                     activePieceMoveList = getMovesForPiece(clickedSquare)
                     #if clicked piece has valid moves
                     if len(activePieceMoveList) != 0:
@@ -83,6 +84,10 @@ while(running):
                         redrawBoard()
                         for validSquare in activePieceMoveList:
                             drawPiece(moveMarkerImg, validSquare)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                reverseBoard()
+                redrawBoard()
 
     #update display
     pygame.display.flip()
