@@ -19,25 +19,25 @@ activePieceMoveList = []
 #END CONSTANTS & VARIABLES
 
 #Set up board
-
+"""
 for x in range(8):
     for y in range(3):
         if x % 2 == 0 and y % 2 != 0:
             boardArr[x][y] = WHITE
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = WHITE
-            """
+            
 for x in range(8):
     for y in range(5,8):
         if x % 2 == 0 and y % 2 != 0:
             boardArr[x][y] = RED
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = RED
-            """
-
-#boardArr[2][3] = WHITE
-#boardArr[2][5] = RED
-#boardArr[0][5] = RED
+            
+"""
+boardArr[2][3] = WHITE
+boardArr[2][5] = RED
+boardArr[0][5] = RED
 
 #METHODS
     #AI turn logic
