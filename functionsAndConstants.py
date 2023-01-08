@@ -1,3 +1,4 @@
+import random
 #CONSTANTS & VARIABLES
 TILE_SIZE = 80
 EMPTY = 0
@@ -7,13 +8,14 @@ WHITE = 3
 WHITEKING = 4
     #2-dimensional array storing piece locations
 boardArr = [[EMPTY] * 8 for _ in range(8)]
+    
     #are eligible moves being shown?
 showingValidMoves = False
-    #list of tuples from getAllAvailableMoves()
-validMoveList = []
     #last clicked red piece
 activePiece = (0,0)
+
 activePieceMoveList = []
+
 #END CONSTANTS & VARIABLES
 
 #Set up board
@@ -24,15 +26,48 @@ for x in range(8):
             boardArr[x][y] = WHITE
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = WHITE
-
+            """
 for x in range(8):
     for y in range(5,8):
         if x % 2 == 0 and y % 2 != 0:
             boardArr[x][y] = RED
         elif x % 2 != 0 and y % 2 == 0:
             boardArr[x][y] = RED
+            """
+
+#boardArr[2][3] = WHITE
+#boardArr[2][5] = RED
+#boardArr[0][5] = RED
 
 #METHODS
+    #AI turn logic
+def AiTurn():
+    reverseBoard()
+    #get number of possible moves
+    availableMoves, numberOfMoves = getAllAvailableMoves()
+    print("Number of available moves for AI", numberOfMoves)
+    random.seed()
+    randomMoveIndex = random.randint(0, numberOfMoves - 1)
+    counter = 0
+    for piece in availableMoves:
+        for destination in piece[1]:
+            if counter == randomMoveIndex:
+                #take action
+                if destination[1] == 0:
+                    boardArr[destination[0]][destination[1]] = REDKING
+                else:
+                    boardArr[destination[0]][destination[1]] = getPiece(piece[0])
+                boardArr[piece[0][0]][piece[0][1]] = EMPTY
+                removeIfAttack(piece[0], destination)
+                #pass to other player
+                reverseBoard()
+                counter = numberOfMoves
+            else:
+                counter += 1
+    
+
+
+    
     #reverse board and colors for AI
 def reverseBoard():
     #switch colors
@@ -51,8 +86,6 @@ def reverseBoard():
     boardArr.reverse()
     for row in boardArr:
         row.reverse()
-    
-    print(boardArr)
     #if move was an attack, remove attacked piece
 
 def removeIfAttack(origin, destination):
@@ -69,7 +102,9 @@ def getBottomRightPos(position):
     return(position[0] + 1, position[1] + 1)
 
 #returns list containing tuple (origin: (x,y),destinations: list<(x, y)>, attackAvailable: boolean) for each red piece
+#also returns number of possible moves (for AI use)
 def getAllAvailableMoves():
+    noOfMoves = 0
     resultList = []
     permitAttacksOnly = False
     #1st pass - append result list with every piece's options, regardless of whether attack is available
@@ -81,19 +116,23 @@ def getAllAvailableMoves():
                     if attackMoveAvailable:
                         permitAttacksOnly = True
                     resultList.append(((x,y), validMoves, attackMoveAvailable))
-    #2nd pass - remove all attackless pieces from resultList if attack is available, then remove the other non attack moves
-        
+                    noOfMoves += len(validMoves)
+
+    #2nd pass - prepare a new list containing only attacking pieces
     if permitAttacksOnly:
+        noOfMoves = 0
         tempList = []
         for element in resultList:
             #if has attack moves
             if element[2]:
                 tempList.append(element)
+                noOfMoves += len(element[1])
         resultList = tempList
-    return resultList
+    return resultList, noOfMoves
 #returns a list of eligible moves for this piece, returns empty list if no moves available
 def getMovesForPiece(position):
-    for element in getAllAvailableMoves():
+    allAvailableMoves, numberOfMoves = getAllAvailableMoves()
+    for element in allAvailableMoves:
         if element[0] == position:
             return element[1]
     return []
@@ -123,13 +162,14 @@ def getValidMoves(position):
             attackMoveAvailable = True
     #if KING and not at bottom row
     if isKing and position[1] != 7:
-        if not atRightExtremum:
+        if not atRightExtremum and getBottomRightPos(position)[0] != 7 and getBottomRightPos(position)[1] != 7:
             #if bottom right attack available
-            if getBottomRightPos(getBottomRightPos(position))[0] != 8 and getPiece(getBottomRightPos(getBottomRightPos(position))) == EMPTY and (
+            if getBottomRightPos(getBottomRightPos(position))[0] != 8 and getPiece(
+                getBottomRightPos(getBottomRightPos(position))) == EMPTY and (
                 getPiece(getBottomRightPos(position)) == WHITE or getPiece(getBottomRightPos(position)) == WHITEKING):
                 validMoveArray.append(getBottomRightPos(getBottomRightPos(position)))
                 attackMoveAvailable = True
-        if not atLeftExtremum:
+        if not atLeftExtremum and getBottomLeftPos(position)[0] != -1 and getBottomLeftPos(position)[1] != 7:
             #if bottom left attack available
             if getBottomLeftPos(getBottomLeftPos(position))[0] != -1 and getPiece(getBottomLeftPos(getBottomLeftPos(position))) == EMPTY and (
                 getPiece(getBottomLeftPos(position)) == WHITE or getPiece(getBottomLeftPos(position)) == WHITEKING):
@@ -146,10 +186,11 @@ def getValidMoves(position):
                 validMoveArray.append(getLeftDiagPos(position))
         #king move
         if isKing:
-            if getBottomRightPos(position)[0] != 8 and getPiece(getBottomRightPos(position)) == EMPTY:
-                validMoveArray.append(getBottomRightPos(position))
-            if getBottomLeftPos(position)[0] != -1 and getPiece(getBottomLeftPos(position)) == EMPTY:
-                validMoveArray.append(getBottomLeftPos(position))
+            if position[1] != 7:
+                if getBottomRightPos(position)[0] != 8 and getPiece(getBottomRightPos(position)) == EMPTY:
+                    validMoveArray.append(getBottomRightPos(position))
+                if getBottomLeftPos(position)[0] != -1 and getPiece(getBottomLeftPos(position)) == EMPTY:
+                    validMoveArray.append(getBottomLeftPos(position))
     return validMoveArray, attackMoveAvailable
         
 def getPiece(squareCoordinates):
@@ -170,4 +211,12 @@ def getCoordinatesFromSquare(hor, ver):
 
 def getSquareFromCoordinates(mousePosition):
     return (mousePosition[0]//TILE_SIZE, mousePosition[1]//TILE_SIZE)
+    #did current player lose? Should be called at the beginning of the current player's turn
+def currentPlayerLost():
+    
+    validMoves, numberOfMoves = getAllAvailableMoves()
+    if numberOfMoves == 0:
+        return True
+    
+
 #END METHODS

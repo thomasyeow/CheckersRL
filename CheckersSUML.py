@@ -22,6 +22,19 @@ moveMarkerImg = pygame.image.load("assets/validMoveMarker.png").convert()
 def drawPiece(pieceImg, position):
     screen.blit(pieceImg, getCoordinatesFromSquare(position[0], position[1]))
 
+def victoryLossScreen(won: bool):
+    message = ""
+    if won:
+        message = "VICTORY"
+    else:
+        message = "LOSS"
+    font = pygame.font.SysFont(None, 60)
+    text = font.render(message, True, (255,0,60), (0,0,128))
+    textRect = text.get_rect()
+    textRect.center = (640//2, 640//2)
+    screen.fill((255,255,255))
+    screen.blit(text, textRect)
+
     #redraw the entire board based on boardArr
 def redrawBoard():
     screen.blit(boardImg, (0,0))
@@ -40,7 +53,15 @@ redrawBoard()
 #Game Loop
 running = True
 while(running):
+    
     for event in pygame.event.get():
+        
+        if currentPlayerLost():
+            victoryLossScreen(False)
+        reverseBoard()
+        if currentPlayerLost():
+            victoryLossScreen(True)
+        reverseBoard()
         #QUIT
         if event.type == pygame.QUIT:
             running = False
@@ -66,10 +87,15 @@ while(running):
                         boardArr[lastClickedRedPiece[0]][lastClickedRedPiece[1]] = EMPTY
                         
                         removeIfAttack(lastClickedRedPiece, clickedSquare)
-                        
+                        #transform into king
                         if clickedSquare[1] == 0:
                             boardArr[clickedSquare[0]][clickedSquare[1]] = REDKING
-                        validMoveList = getAllAvailableMoves()
+                        reverseBoard()
+                        if not currentPlayerLost():
+                            reverseBoard()
+                            AiTurn()
+                        else:
+                            reverseBoard()
                 redrawBoard()
                 showingValidMoves = False
             else:
@@ -84,10 +110,6 @@ while(running):
                         redrawBoard()
                         for validSquare in activePieceMoveList:
                             drawPiece(moveMarkerImg, validSquare)
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                reverseBoard()
-                redrawBoard()
 
     #update display
     pygame.display.flip()
