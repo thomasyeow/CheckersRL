@@ -1,6 +1,6 @@
 import pygame
 #custom library containing function and constant definitions, for tidyness
-from functionsAndConstants import *
+from gameLogic import *
 
 #initialize pygame
 pygame.init()
