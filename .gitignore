@@ -2,3 +2,7 @@
 *.pyproj
 *.sln
 __pycache__
+*.spec
+dist/
+build/
+*.pkl
