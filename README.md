@@ -2,6 +2,7 @@
 PyGame Checkers for testing the Q-Learning RL algorithm
 
 WHAT IS THIS
+
 This repo comes with 2 programs: qLearning.exe & CheckersSUML.exe.
 
 qLearning.exe trains a q-Learning agent to play checkers over 5000 iterations, against an opposing agent that makes totally random moves.
